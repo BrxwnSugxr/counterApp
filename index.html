@@ -1,0 +1,1361 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1"
+    />
+    <title>Dhikr — Counter</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Amiri:wght@400;700&family=Inter:wght@400;500;600&family=Caveat:wght@500;600&display=swap");
+
+      :root {
+        --bg: #14120f;
+        --surface: #1e1b16;
+        --surface-2: #262119;
+        --bead-idle: #3a342a;
+        --bead-lit: #e8dcc4;
+        --accent: #c97b3d;
+        --accent-soft: rgba(201, 123, 61, 0.18);
+        --text: #f2ede3;
+        --text-muted: #8c8371;
+        --border: #332d22;
+        --danger: #b8583f;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        * {
+          animation-duration: 0.001ms !important;
+          transition-duration: 0.001ms !important;
+        }
+      }
+
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: "Inter", sans-serif;
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        position: relative;
+        overflow-x: hidden;
+      }
+
+      .grain {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        opacity: 0.05;
+        mix-blend-mode: overlay;
+        z-index: 0;
+      }
+
+      .app {
+        width: 100%;
+        max-width: 420px;
+        padding: 28px 20px 40px;
+        position: relative;
+        z-index: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .wordmark {
+        font-family: "Fraunces", serif;
+        font-weight: 500;
+        font-size: 20px;
+        letter-spacing: 0.02em;
+        color: var(--text);
+      }
+      .wordmark .word {
+        position: relative;
+        display: inline-block;
+      }
+      .wordmark .scribble {
+        position: absolute;
+        left: -3px;
+        bottom: -8px;
+        width: calc(100% + 10px);
+        height: 10px;
+        overflow: visible;
+      }
+      .wordmark .scribble path {
+        stroke: var(--accent);
+        stroke-width: 2;
+        fill: none;
+        stroke-linecap: round;
+      }
+
+      .header-actions {
+        display: flex;
+        gap: 8px;
+      }
+      .icon-btn {
+        background: none;
+        border: 1px solid var(--border);
+        color: var(--text-muted);
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 15px;
+        transition:
+          color 0.2s,
+          border-color 0.2s,
+          transform 0.2s;
+        position: relative;
+      }
+      .icon-btn:hover {
+        color: var(--text);
+        border-color: var(--text-muted);
+      }
+      .icon-btn.pending {
+        color: var(--danger);
+        border-color: var(--danger);
+        animation: pulse 1s ease-in-out infinite;
+      }
+      @keyframes pulse {
+        0%,
+        100% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.08);
+        }
+      }
+
+      .phrase-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 24px;
+        padding: 30px 20px 22px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+        user-select: none;
+        -webkit-user-select: none;
+        -webkit-tap-highlight-color: transparent;
+        position: relative;
+        transition:
+          box-shadow 0.25s ease,
+          transform 0.08s ease;
+      }
+      .phrase-card:active {
+        transform: scale(0.997);
+      }
+      .phrase-card:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 3px;
+      }
+      .phrase-card.celebrate {
+        box-shadow:
+          0 0 0 1px var(--accent),
+          0 0 44px var(--accent-soft);
+      }
+
+      .arabic {
+        font-family: "Amiri", serif;
+        font-size: 34px;
+        line-height: 1.3;
+        direction: rtl;
+        text-align: center;
+      }
+      .custom-phrase {
+        font-family: "Fraunces", serif;
+        font-weight: 500;
+        font-size: 27px;
+        line-height: 1.3;
+        text-align: center;
+      }
+      .translit {
+        font-family: "Fraunces", serif;
+        font-weight: 500;
+        font-size: 15px;
+        color: var(--text-muted);
+        letter-spacing: 0.02em;
+      }
+
+      .necklace-wrap {
+        position: relative;
+        width: 100%;
+        max-width: 300px;
+      }
+      svg#necklace {
+        width: 100%;
+        height: auto;
+        margin: 6px 0 -4px;
+        overflow: visible;
+        display: block;
+      }
+
+      .margin-note {
+        position: absolute;
+        right: -6px;
+        bottom: 14%;
+        font-family: "Caveat", cursive;
+        font-size: 19px;
+        font-weight: 600;
+        color: var(--accent);
+        transform: rotate(-9deg);
+        line-height: 1;
+        pointer-events: none;
+        transition: opacity 0.5s ease;
+        text-align: right;
+      }
+      .margin-note.gone {
+        opacity: 0;
+      }
+      .note-arrow {
+        width: 26px;
+        height: 26px;
+        display: block;
+        margin: 2px 0 0 auto;
+        transform: scaleX(-1) rotate(6deg);
+      }
+      .note-arrow path {
+        stroke: var(--accent);
+        stroke-width: 2;
+        fill: none;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      .bead {
+        transition: fill 0.18s ease;
+        transform-box: fill-box;
+        transform-origin: center;
+      }
+      .bead.lit {
+        fill: var(--bead-lit);
+      }
+      .bead.idle {
+        fill: var(--bead-idle);
+      }
+      .bead.pop {
+        animation: beadPop 0.35s ease;
+      }
+      @keyframes beadPop {
+        0% {
+          transform: scale(0.4);
+        }
+        55% {
+          transform: scale(1.3);
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+      .imam-bead {
+        fill: var(--accent);
+      }
+      .tassel {
+        stroke: var(--border);
+        stroke-width: 2;
+      }
+
+      .lap-info {
+        font-size: 12px;
+        color: var(--text-muted);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+      .count-big {
+        font-family: "Fraunces", serif;
+        font-weight: 500;
+        font-size: 46px;
+        line-height: 1;
+        margin: 2px 0;
+        font-variant-numeric: tabular-nums;
+      }
+      .meaning {
+        font-size: 13px;
+        color: var(--text-muted);
+        text-align: center;
+        min-height: 16px;
+      }
+      .footline {
+        min-height: 20px;
+        margin-top: 4px;
+      }
+      .hint {
+        font-family: "Caveat", cursive;
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--accent);
+        opacity: 0.75;
+        transition: opacity 0.4s;
+      }
+
+      .toast {
+        position: absolute;
+        top: 14px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: var(--accent);
+        color: #1a1208;
+        font-family: "Fraunces", serif;
+        font-weight: 600;
+        font-size: 13px;
+        padding: 6px 14px;
+        border-radius: 100px;
+        opacity: 0;
+        pointer-events: none;
+        transition:
+          opacity 0.3s,
+          transform 0.3s;
+        white-space: nowrap;
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+      .toast.show {
+        opacity: 1;
+        transform: translateX(-50%) translateY(4px);
+        pointer-events: auto;
+      }
+      .toast .toast-action {
+        text-decoration: underline;
+        cursor: pointer;
+      }
+
+      .chip-row {
+        display: flex;
+        gap: 8px;
+        overflow-x: auto;
+        padding-bottom: 2px;
+        scrollbar-width: none;
+        align-items: center;
+      }
+      .chip-row::-webkit-scrollbar {
+        display: none;
+      }
+
+      .chip {
+        flex: 0 0 auto;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        color: var(--text-muted);
+        font-family: "Inter";
+        font-size: 13px;
+        padding: 9px 14px;
+        border-radius: 100px;
+        cursor: pointer;
+        white-space: nowrap;
+        transition: all 0.15s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .chip:nth-child(odd) {
+        transform: rotate(-1.1deg);
+      }
+      .chip:nth-child(even) {
+        transform: rotate(0.9deg);
+      }
+      .chip.active,
+      .chip:hover {
+        transform: rotate(0deg);
+      }
+      .chip.active {
+        background: var(--accent);
+        color: #1a1208;
+        border-color: var(--accent);
+        font-weight: 600;
+      }
+      .chip:hover:not(.active) {
+        border-color: var(--text-muted);
+        color: var(--text);
+      }
+      .chip .dot {
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        background: currentColor;
+        opacity: 0.5;
+      }
+      .chip .del {
+        opacity: 0.55;
+        padding-left: 2px;
+        font-size: 14px;
+        line-height: 1;
+      }
+      .chip .del:hover {
+        opacity: 1;
+        color: var(--danger);
+      }
+      .add-track-btn {
+        width: 100%;
+        margin-top: 10px;
+        background: none;
+        border: 1px dashed var(--border);
+        color: var(--accent);
+        font-family: "Inter";
+        font-size: 13px;
+        font-weight: 600;
+        padding: 11px;
+        border-radius: 14px;
+        cursor: pointer;
+        transition: all 0.15s ease;
+      }
+      .add-track-btn:hover {
+        background: var(--accent-soft);
+        border-color: var(--accent);
+      }
+
+      .stats {
+        display: flex;
+        justify-content: space-between;
+        border-top: 1px solid var(--border);
+        padding-top: 16px;
+        margin-top: 4px;
+      }
+      .stat {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+        flex: 1;
+      }
+      .stat span {
+        font-family: "Fraunces", serif;
+        font-weight: 500;
+        font-size: 22px;
+        font-variant-numeric: tabular-nums;
+      }
+      .stat label {
+        font-size: 10px;
+        color: var(--text-muted);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .section-label {
+        font-size: 11px;
+        color: var(--text-muted);
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        padding-left: 2px;
+        margin-bottom: 8px;
+      }
+
+      .colophon {
+        font-family: "Caveat", cursive;
+        font-size: 16px;
+        color: var(--text-muted);
+        opacity: 0.7;
+        text-align: center;
+        margin-top: -4px;
+        transform: rotate(-0.6deg);
+      }
+
+      .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(10, 8, 6, 0.6);
+        backdrop-filter: blur(3px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 50;
+        opacity: 1;
+        transition: opacity 0.2s ease;
+        padding: 20px;
+      }
+      .modal-overlay.hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+      .modal-card {
+        background: var(--surface-2);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        padding: 22px;
+        width: min(360px, 100%);
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .modal-title {
+        font-family: "Fraunces", serif;
+        font-weight: 500;
+        font-size: 18px;
+      }
+      .modal-sub {
+        font-size: 12px;
+        color: var(--text-muted);
+        margin-top: -8px;
+      }
+      .field-label {
+        font-size: 11px;
+        color: var(--text-muted);
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+      .field-input {
+        background: var(--bg);
+        border: 1px solid var(--border);
+        color: var(--text);
+        border-radius: 10px;
+        padding: 11px 13px;
+        font-family: "Inter";
+        font-size: 14px;
+        outline: none;
+        transition: border-color 0.15s;
+      }
+      .field-input:focus {
+        border-color: var(--accent);
+      }
+      .modal-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+        margin-top: 6px;
+      }
+      .btn {
+        border-radius: 10px;
+        padding: 10px 16px;
+        font-family: "Inter";
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        border: 1px solid transparent;
+      }
+      .btn-ghost {
+        background: none;
+        border-color: var(--border);
+        color: var(--text-muted);
+      }
+      .btn-ghost:hover {
+        color: var(--text);
+      }
+      .btn-primary {
+        background: var(--accent);
+        color: #1a1208;
+      }
+      .btn-primary:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+
+      .visually-hidden {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+      }
+    </style>
+  </head>
+  <body>
+    <svg class="grain" width="0" height="0">
+      <filter id="noise">
+        <feTurbulence
+          type="fractalNoise"
+          baseFrequency="0.9"
+          numOctaves="2"
+          stitchTiles="stitch"
+        />
+      </filter>
+    </svg>
+    <div class="grain" style="filter: url(#noise); background: #000"></div>
+
+    <div class="app">
+      <header>
+        <div class="wordmark">
+          <span class="word"
+            >dhikr<svg
+              class="scribble"
+              viewBox="0 0 80 12"
+              preserveAspectRatio="none"
+              aria-hidden="true"
+            >
+              <path d="M2 6 C 18 2, 34 10, 50 5 S 70 2, 78 6" /></svg
+          ></span>
+          counter
+        </div>
+        <div class="header-actions">
+          <button
+            id="minusBtn"
+            class="icon-btn"
+            title="Subtract one count"
+            aria-label="Subtract one from count"
+          >
+            −
+          </button>
+          <button
+            id="resetBtn"
+            class="icon-btn"
+            title="Reset today's count"
+            aria-label="Reset today's count"
+          >
+            ⟲
+          </button>
+        </div>
+      </header>
+
+      <div
+        class="phrase-card"
+        id="tapZone"
+        role="button"
+        tabindex="0"
+        aria-label="Tap to count"
+      >
+        <div class="toast" id="toast"></div>
+        <div id="primaryText"></div>
+        <div class="translit" id="translitText"></div>
+
+        <div class="necklace-wrap">
+          <svg id="necklace" viewBox="0 0 320 300"></svg>
+          <div class="margin-note" id="marginNote">
+            start here
+            <svg class="note-arrow" viewBox="0 0 40 40" aria-hidden="true">
+              <path d="M4 4 C 10 14, 14 22, 22 30" />
+              <path d="M14 27 L22 30 L20 21" />
+            </svg>
+          </div>
+        </div>
+
+        <div class="lap-info" id="lapInfo">Lap 1</div>
+        <div class="count-big" id="countBig">0</div>
+        <div class="meaning" id="meaningText"></div>
+        <div class="footline">
+          <span class="hint" id="hint"
+            >tap anywhere, as many times as you need</span
+          >
+        </div>
+      </div>
+
+      <div class="visually-hidden" id="liveRegion" aria-live="polite"></div>
+
+      <div>
+        <div class="section-label">Target</div>
+        <div class="chip-row" id="targets"></div>
+      </div>
+
+      <div>
+        <div class="section-label">Track</div>
+        <div class="chip-row" id="tracks"></div>
+        <button id="addTrackBtn" class="add-track-btn">+ Add a zikir</button>
+      </div>
+
+      <div class="stats">
+        <div class="stat">
+          <span id="statToday">0</span><label>Today</label>
+        </div>
+        <div class="stat">
+          <span id="statStreak">0</span><label>Day streak</label>
+        </div>
+        <div class="stat">
+          <span id="statLifetime">0</span><label>Lifetime</label>
+        </div>
+      </div>
+
+      <div class="colophon">
+        made for slow mornings and long queues — count as many as you need
+      </div>
+    </div>
+
+    <div class="modal-overlay hidden" id="modalOverlay">
+      <div class="modal-card">
+        <div class="modal-title">Add a zikir</div>
+        <div class="modal-sub">
+          Type it however you say it — Arabic script or transliteration both
+          work.
+        </div>
+        <div class="field-label">Phrase</div>
+        <input
+          id="inputPhrase"
+          class="field-input"
+          type="text"
+          placeholder="e.g. يا لطيف or Ya Latif"
+          maxlength="60"
+        />
+        <div class="field-label">Meaning (optional)</div>
+        <input
+          id="inputMeaning"
+          class="field-input"
+          type="text"
+          placeholder="e.g. O Most Gentle"
+          maxlength="80"
+        />
+        <div class="modal-actions">
+          <button id="modalCancel" class="btn btn-ghost">Cancel</button>
+          <button id="modalAdd" class="btn btn-primary" disabled>Add</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-overlay hidden" id="targetModalOverlay">
+      <div class="modal-card">
+        <div class="modal-title">Set a target</div>
+        <div class="field-label">Number of counts</div>
+        <input
+          id="inputTarget"
+          class="field-input"
+          type="number"
+          inputmode="numeric"
+          min="1"
+          step="1"
+          placeholder="e.g. 250"
+        />
+        <div class="modal-actions">
+          <button id="targetModalCancel" class="btn btn-ghost">Cancel</button>
+          <button id="targetModalSet" class="btn btn-primary" disabled>
+            Set
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        const PRESETS = [
+          {
+            id: "subhanallah",
+            arabic: "سبحان الله",
+            translit: "SubhanAllah",
+            meaning: "Glory be to Allah",
+          },
+          {
+            id: "alhamdulillah",
+            arabic: "الحمد لله",
+            translit: "Alhamdulillah",
+            meaning: "All praise is for Allah",
+          },
+          {
+            id: "allahuakbar",
+            arabic: "الله أكبر",
+            translit: "Allahu Akbar",
+            meaning: "Allah is greatest",
+          },
+          {
+            id: "lailaha",
+            arabic: "لا إله إلا الله",
+            translit: "La ilaha illallah",
+            meaning: "There is no god but Allah",
+          },
+          {
+            id: "astaghfirullah",
+            arabic: "أستغفر الله",
+            translit: "Astaghfirullah",
+            meaning: "I seek Allah\u2019s forgiveness",
+          },
+        ];
+        const TARGETS = [
+          { label: "33", value: 33 },
+          { label: "99", value: 99 },
+          { label: "100", value: 100 },
+          { label: "\u221E", value: 0 },
+        ];
+
+        let customTracks = [];
+        let ALL_TRACKS = [];
+
+        const els = {
+          primary: document.getElementById("primaryText"),
+          translit: document.getElementById("translitText"),
+          meaning: document.getElementById("meaningText"),
+          lapInfo: document.getElementById("lapInfo"),
+          countBig: document.getElementById("countBig"),
+          hint: document.getElementById("hint"),
+          marginNote: document.getElementById("marginNote"),
+          tapZone: document.getElementById("tapZone"),
+          necklace: document.getElementById("necklace"),
+          targets: document.getElementById("targets"),
+          tracks: document.getElementById("tracks"),
+          addTrackBtn: document.getElementById("addTrackBtn"),
+          statToday: document.getElementById("statToday"),
+          statStreak: document.getElementById("statStreak"),
+          statLifetime: document.getElementById("statLifetime"),
+          minusBtn: document.getElementById("minusBtn"),
+          resetBtn: document.getElementById("resetBtn"),
+          toast: document.getElementById("toast"),
+          liveRegion: document.getElementById("liveRegion"),
+          modalOverlay: document.getElementById("modalOverlay"),
+          inputPhrase: document.getElementById("inputPhrase"),
+          inputMeaning: document.getElementById("inputMeaning"),
+          modalAdd: document.getElementById("modalAdd"),
+          modalCancel: document.getElementById("modalCancel"),
+          targetModalOverlay: document.getElementById("targetModalOverlay"),
+          inputTarget: document.getElementById("inputTarget"),
+          targetModalSet: document.getElementById("targetModalSet"),
+          targetModalCancel: document.getElementById("targetModalCancel"),
+        };
+
+        function todayStr() {
+          return new Date().toISOString().slice(0, 10);
+        }
+        function yesterdayStr() {
+          const d = new Date();
+          d.setDate(d.getDate() - 1);
+          return d.toISOString().slice(0, 10);
+        }
+        function fmt(n) {
+          return n.toLocaleString("en-US");
+        }
+        function isArabicText(s) {
+          return /[\u0600-\u06FF]/.test(s);
+        }
+
+        async function sGet(key) {
+          try {
+            const r = await window.storage.get(key, false);
+            return r ? JSON.parse(r.value) : null;
+          } catch (e) {
+            return null;
+          }
+        }
+        async function sSet(key, val) {
+          try {
+            await window.storage.set(key, JSON.stringify(val), false);
+          } catch (e) {
+            console.error("storage error", e);
+          }
+        }
+        async function sDelete(key) {
+          try {
+            await window.storage.delete(key, false);
+          } catch (e) {}
+        }
+
+        let meta = { lifetime: 0, streak: 0, lastActive: null };
+        let trackCache = {};
+        let currentTrackId = PRESETS[0].id;
+        let hasTappedOnce = false;
+        let saveTimer = null;
+
+        function scheduleSave() {
+          clearTimeout(saveTimer);
+          saveTimer = setTimeout(flushSave, 500);
+        }
+        function flushSave() {
+          sSet("meta", meta);
+          if (trackCache[currentTrackId])
+            sSet("track:" + currentTrackId, trackCache[currentTrackId]);
+        }
+        window.addEventListener("visibilitychange", () => {
+          if (document.visibilityState === "hidden") {
+            clearTimeout(saveTimer);
+            flushSave();
+          }
+        });
+
+        async function loadTrack(id) {
+          if (trackCache[id]) return trackCache[id];
+          let d = await sGet("track:" + id);
+          if (!d) d = { date: todayStr(), count: 0, target: 33 };
+          if (d.date !== todayStr()) {
+            d.date = todayStr();
+            d.count = 0;
+          }
+          trackCache[id] = d;
+          return d;
+        }
+
+        function getTrack(id) {
+          return ALL_TRACKS.find((t) => t.id === id);
+        }
+
+        function getDisplay(track) {
+          if (track.isCustom) {
+            const arabic = isArabicText(track.phrase);
+            return {
+              primary: track.phrase,
+              primaryClass: arabic ? "arabic" : "custom-phrase",
+              secondary: null,
+              meaning: track.meaning || "",
+            };
+          }
+          return {
+            primary: track.arabic,
+            primaryClass: "arabic",
+            secondary: track.translit,
+            meaning: track.meaning || "",
+          };
+        }
+
+        function polar(cx, cy, r, thetaDeg) {
+          const t = (thetaDeg * Math.PI) / 180;
+          return { x: cx + r * Math.sin(t), y: cy - r * Math.cos(t) };
+        }
+
+        function buildNecklace(lapLength, litCount, animateLast) {
+          const svg = els.necklace;
+          svg.innerHTML = "";
+          const cx = 160,
+            cy = 130,
+            r = 108;
+          const ns = "http://www.w3.org/2000/svg";
+
+          const imamPos = polar(cx, cy, r, 180);
+          const tassel = document.createElementNS(ns, "line");
+          tassel.setAttribute("x1", imamPos.x);
+          tassel.setAttribute("y1", imamPos.y + 10);
+          tassel.setAttribute("x2", imamPos.x);
+          tassel.setAttribute("y2", imamPos.y + 34);
+          tassel.setAttribute("class", "tassel");
+          svg.appendChild(tassel);
+
+          const startA = -160,
+            endA = 160;
+          for (let i = 0; i < lapLength; i++) {
+            const theta =
+              lapLength === 1
+                ? 0
+                : startA + i * ((endA - startA) / (lapLength - 1));
+            // deterministic jitter per bead index — a real strung necklace is never perfectly even
+            const seed =
+              Math.sin(i * 12.9898 + lapLength * 78.233) * 43758.5453;
+            const jitter = seed - Math.floor(seed); // 0..1
+            const rJit = r + (jitter - 0.5) * 7;
+            const sizeJit = 9 + (jitter - 0.5) * 2.2;
+            const p = polar(cx, cy, rJit, theta);
+            const c = document.createElementNS(ns, "circle");
+            c.setAttribute("cx", p.x);
+            c.setAttribute("cy", p.y);
+            c.setAttribute("r", sizeJit);
+            const lit = i < litCount;
+            c.setAttribute(
+              "class",
+              "bead " +
+                (lit ? "lit" : "idle") +
+                (animateLast && i === litCount - 1 ? " pop" : ""),
+            );
+            svg.appendChild(c);
+          }
+
+          const imam = document.createElementNS(ns, "circle");
+          imam.setAttribute("cx", imamPos.x);
+          imam.setAttribute("cy", imamPos.y);
+          imam.setAttribute("r", 12);
+          imam.setAttribute("class", "imam-bead");
+          svg.appendChild(imam);
+        }
+
+        function computeLapState(count, target) {
+          if (!target) {
+            const posInLap = count % 33;
+            const lapNum = Math.floor(count / 33) + 1;
+            return { lapLength: 33, posInLap, lapNum, totalLaps: null };
+          }
+          const inCycle = count % target;
+          const lapIndex = Math.floor(inCycle / 33);
+          const lapLength = Math.min(33, target - lapIndex * 33);
+          const posInLap = inCycle - lapIndex * 33;
+          const totalLaps = Math.ceil(target / 33);
+          return { lapLength, posInLap, lapNum: lapIndex + 1, totalLaps };
+        }
+
+        function updateOnboarding() {
+          const data = trackCache[currentTrackId];
+          const show = !data || data.count === 0;
+          els.hint.style.display = show ? "inline" : "none";
+          els.marginNote.classList.toggle("gone", !show);
+          hasTappedOnce = !show;
+        }
+
+        function render(animateLast) {
+          const track = getTrack(currentTrackId);
+          const data = trackCache[currentTrackId];
+          const disp = getDisplay(track);
+
+          els.primary.textContent = disp.primary;
+          els.primary.className = disp.primaryClass;
+          els.translit.textContent = disp.secondary || "";
+          els.translit.style.display = disp.secondary ? "block" : "none";
+          els.meaning.textContent = disp.meaning;
+
+          const state = computeLapState(data.count, data.target);
+          buildNecklace(state.lapLength, state.posInLap, animateLast);
+          els.lapInfo.textContent = state.totalLaps
+            ? `Lap ${Math.min(state.lapNum, state.totalLaps)} of ${state.totalLaps}`
+            : `Lap ${state.lapNum}`;
+          els.countBig.textContent = fmt(data.count);
+
+          document.querySelectorAll("#targets .chip").forEach((ch) => {
+            ch.classList.toggle(
+              "active",
+              Number(ch.dataset.value) === data.target,
+            );
+          });
+          document.querySelectorAll("#tracks .chip").forEach((ch) => {
+            ch.classList.toggle("active", ch.dataset.id === currentTrackId);
+          });
+
+          els.statToday.textContent = fmt(data.count);
+          els.statStreak.textContent = fmt(meta.streak);
+          els.statLifetime.textContent = fmt(meta.lifetime);
+
+          els.tapZone.setAttribute(
+            "aria-label",
+            `${disp.primary}, count ${data.count}, tap to increase`,
+          );
+        }
+
+        function vibrate(pattern) {
+          if (navigator.vibrate) {
+            try {
+              navigator.vibrate(pattern);
+            } catch (e) {}
+          }
+        }
+
+        function showToast(text, actionLabel, actionFn) {
+          els.toast.innerHTML = "";
+          els.toast.appendChild(document.createTextNode(text));
+          if (actionLabel) {
+            const a = document.createElement("span");
+            a.className = "toast-action";
+            a.textContent = actionLabel;
+            a.addEventListener("click", (e) => {
+              e.stopPropagation();
+              actionFn && actionFn();
+              els.toast.classList.remove("show");
+            });
+            els.toast.appendChild(a);
+          }
+          els.toast.classList.add("show");
+          clearTimeout(showToast._t);
+          showToast._t = setTimeout(
+            () => els.toast.classList.remove("show"),
+            actionLabel ? 4000 : 1300,
+          );
+        }
+
+        function announce(text) {
+          els.liveRegion.textContent = text;
+        }
+
+        function registerDailyActivity() {
+          const today = todayStr();
+          if (meta.lastActive === today) return;
+          meta.streak =
+            meta.lastActive === yesterdayStr() ? meta.streak + 1 : 1;
+          meta.lastActive = today;
+        }
+
+        function tap() {
+          const data = trackCache[currentTrackId];
+          const before = computeLapState(data.count, data.target);
+
+          data.count += 1;
+          meta.lifetime += 1;
+          registerDailyActivity();
+
+          const after = computeLapState(data.count, data.target);
+
+          if (hasTappedOnce === false) {
+            updateOnboarding();
+          }
+
+          render(true);
+
+          if (data.target && data.count % data.target === 0) {
+            els.tapZone.classList.add("celebrate");
+            showToast(data.target + " completed ✓");
+            announce(data.target + " completed");
+            vibrate([40, 80, 40, 80, 80]);
+            setTimeout(() => els.tapZone.classList.remove("celebrate"), 700);
+          } else if (after.lapNum !== before.lapNum) {
+            announce(
+              "Lap " +
+                Math.min(after.lapNum, after.totalLaps || after.lapNum) +
+                " started",
+            );
+          }
+
+          scheduleSave();
+        }
+
+        function decrement() {
+          const data = trackCache[currentTrackId];
+          if (data.count <= 0) return;
+          data.count -= 1;
+          meta.lifetime = Math.max(0, meta.lifetime - 1);
+          if (data.count === 0) updateOnboarding();
+          render(false);
+          scheduleSave();
+        }
+        els.minusBtn.addEventListener("click", decrement);
+
+        function buildTargetChips() {
+          els.targets.innerHTML = "";
+          const presetValues = TARGETS.map((t) => t.value);
+          const currentTarget = trackCache[currentTrackId]
+            ? trackCache[currentTrackId].target
+            : 33;
+          const isCustomActive = !presetValues.includes(currentTarget);
+
+          TARGETS.forEach((t) => {
+            const chip = document.createElement("button");
+            chip.className = "chip";
+            chip.textContent = t.label;
+            chip.dataset.value = t.value;
+            chip.addEventListener("click", () => {
+              trackCache[currentTrackId].target = t.value;
+              scheduleSave();
+              buildTargetChips();
+              render(false);
+            });
+            els.targets.appendChild(chip);
+          });
+
+          const customChip = document.createElement("button");
+          customChip.className = "chip" + (isCustomActive ? " active" : "");
+          customChip.textContent = isCustomActive
+            ? fmt(currentTarget)
+            : "Custom";
+          customChip.dataset.custom = "true";
+          customChip.addEventListener("click", openTargetModal);
+          els.targets.appendChild(customChip);
+        }
+
+        function openTargetModal() {
+          const currentTarget = trackCache[currentTrackId]
+            ? trackCache[currentTrackId].target
+            : "";
+          const presetValues = TARGETS.map((t) => t.value);
+          els.inputTarget.value =
+            currentTarget && !presetValues.includes(currentTarget)
+              ? currentTarget
+              : "";
+          els.targetModalSet.disabled = true;
+          els.targetModalOverlay.classList.remove("hidden");
+          setTimeout(() => els.inputTarget.focus(), 50);
+        }
+        function closeTargetModal() {
+          els.targetModalOverlay.classList.add("hidden");
+        }
+
+        els.inputTarget.addEventListener("input", () => {
+          const v = parseInt(els.inputTarget.value, 10);
+          els.targetModalSet.disabled = !(v > 0);
+        });
+        els.targetModalCancel.addEventListener("click", closeTargetModal);
+        els.targetModalOverlay.addEventListener("click", (e) => {
+          if (e.target === els.targetModalOverlay) closeTargetModal();
+        });
+        els.inputTarget.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" && !els.targetModalSet.disabled)
+            setCustomTarget();
+        });
+        els.targetModalSet.addEventListener("click", setCustomTarget);
+
+        function setCustomTarget() {
+          const v = parseInt(els.inputTarget.value, 10);
+          if (!(v > 0)) return;
+          trackCache[currentTrackId].target = v;
+          scheduleSave();
+          buildTargetChips();
+          render(false);
+          closeTargetModal();
+        }
+
+        function buildTrackChips() {
+          els.tracks.innerHTML = "";
+          ALL_TRACKS.forEach((t) => {
+            const chip = document.createElement("button");
+            chip.className = "chip";
+            chip.dataset.id = t.id;
+
+            const label = document.createElement("span");
+            label.textContent = t.isCustom ? t.phrase : t.translit;
+            chip.appendChild(label);
+
+            if (t.isCustom) {
+              const dot = document.createElement("span");
+              dot.className = "dot";
+              chip.insertBefore(dot, label);
+              const del = document.createElement("span");
+              del.className = "del";
+              del.textContent = "×";
+              del.title = "Remove";
+              del.addEventListener("click", (e) => {
+                e.stopPropagation();
+                deleteCustomTrack(t.id);
+              });
+              chip.appendChild(del);
+            }
+
+            chip.addEventListener("click", async () => {
+              currentTrackId = t.id;
+              await loadTrack(t.id);
+              sSet("ui:lastTrack", { id: t.id });
+              hasTappedOnce = false;
+              updateOnboarding();
+              buildTargetChips();
+              render(false);
+            });
+            els.tracks.appendChild(chip);
+          });
+        }
+
+        async function deleteCustomTrack(id) {
+          const removed = customTracks.find((t) => t.id === id);
+          customTracks = customTracks.filter((t) => t.id !== id);
+          ALL_TRACKS = PRESETS.concat(customTracks);
+          await sSet("custom-tracks", customTracks);
+          await sDelete("track:" + id);
+          delete trackCache[id];
+
+          if (currentTrackId === id) {
+            currentTrackId = PRESETS[0].id;
+            await loadTrack(currentTrackId);
+            sSet("ui:lastTrack", { id: currentTrackId });
+          }
+          buildTrackChips();
+          buildTargetChips();
+          render(false);
+
+          showToast("Zikir removed", "Undo", async () => {
+            customTracks.push(removed);
+            ALL_TRACKS = PRESETS.concat(customTracks);
+            await sSet("custom-tracks", customTracks);
+            buildTrackChips();
+            render(false);
+          });
+        }
+
+        function openModal() {
+          els.inputPhrase.value = "";
+          els.inputMeaning.value = "";
+          els.modalAdd.disabled = true;
+          els.modalOverlay.classList.remove("hidden");
+          setTimeout(() => els.inputPhrase.focus(), 50);
+        }
+        function closeModal() {
+          els.modalOverlay.classList.add("hidden");
+        }
+
+        els.inputPhrase.addEventListener("input", () => {
+          els.modalAdd.disabled = els.inputPhrase.value.trim().length === 0;
+        });
+        els.modalCancel.addEventListener("click", closeModal);
+        els.addTrackBtn.addEventListener("click", openModal);
+        els.modalOverlay.addEventListener("click", (e) => {
+          if (e.target === els.modalOverlay) closeModal();
+        });
+        document.addEventListener("keydown", (e) => {
+          if (
+            e.key === "Escape" &&
+            !els.modalOverlay.classList.contains("hidden")
+          )
+            closeModal();
+        });
+
+        async function addCustomTrack() {
+          const phrase = els.inputPhrase.value.trim();
+          if (!phrase) return;
+          const meaning = els.inputMeaning.value.trim();
+          const id =
+            "custom-" +
+            Date.now().toString(36) +
+            Math.random().toString(36).slice(2, 6);
+          const track = {
+            id,
+            phrase,
+            meaning,
+            isCustom: true,
+            createdAt: todayStr(),
+          };
+          customTracks.push(track);
+          ALL_TRACKS = PRESETS.concat(customTracks);
+          await sSet("custom-tracks", customTracks);
+
+          currentTrackId = id;
+          await loadTrack(id);
+          sSet("ui:lastTrack", { id });
+
+          buildTrackChips();
+          buildTargetChips();
+          hasTappedOnce = false;
+          updateOnboarding();
+          render(false);
+          closeModal();
+        }
+        els.modalAdd.addEventListener("click", addCustomTrack);
+        els.inputMeaning.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" && !els.modalAdd.disabled) addCustomTrack();
+        });
+        els.inputPhrase.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" && !els.modalAdd.disabled) addCustomTrack();
+        });
+
+        let resetPending = false,
+          resetTimer = null;
+        els.resetBtn.addEventListener("click", () => {
+          if (!resetPending) {
+            resetPending = true;
+            els.resetBtn.classList.add("pending");
+            els.resetBtn.title = "Tap again to confirm reset";
+            resetTimer = setTimeout(() => {
+              resetPending = false;
+              els.resetBtn.classList.remove("pending");
+              els.resetBtn.title = "Reset today's count";
+            }, 3000);
+          } else {
+            clearTimeout(resetTimer);
+            resetPending = false;
+            els.resetBtn.classList.remove("pending");
+            els.resetBtn.title = "Reset today's count";
+            trackCache[currentTrackId].count = 0;
+            updateOnboarding();
+            scheduleSave();
+            render(false);
+          }
+        });
+
+        els.tapZone.addEventListener("click", tap);
+        els.tapZone.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            tap();
+          }
+        });
+
+        async function init() {
+          meta = (await sGet("meta")) || {
+            lifetime: 0,
+            streak: 0,
+            lastActive: null,
+          };
+          customTracks = (await sGet("custom-tracks")) || [];
+          ALL_TRACKS = PRESETS.concat(customTracks);
+
+          const lastTrack = await sGet("ui:lastTrack");
+          if (lastTrack && ALL_TRACKS.some((t) => t.id === lastTrack.id))
+            currentTrackId = lastTrack.id;
+          else currentTrackId = PRESETS[0].id;
+
+          await loadTrack(currentTrackId);
+          buildTargetChips();
+          buildTrackChips();
+          updateOnboarding();
+          render(false);
+        }
+
+        init();
+      })();
+    </script>
+  </body>
+</html>
