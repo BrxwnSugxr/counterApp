@@ -27,8 +27,34 @@
     </svg>
     <div class="grain" style="filter: url(#noise); background: #000"></div>
 
+    <div class="nav-overlay" id="navOverlay"></div>
+    <nav class="nav-drawer" id="navDrawer" aria-label="Main navigation">
+      <div class="nav-drawer-header">
+        <span class="nav-drawer-title">Menu</span>
+        <button id="navClose" class="nav-close" aria-label="Close navigation">
+          ×
+        </button>
+      </div>
+      <a href="index.html" class="nav-link active">Dhikr Counter</a>
+      <a href="adhkar.html" class="nav-link">Adhkar</a>
+      <a href="quran.html" class="nav-link">Quran</a>
+      <a href="hadeeth.html" class="nav-link">Hadeeth</a>
+      <a href="99-names.html" class="nav-link">99 Names</a>
+    </nav>
+
     <div class="app">
       <header>
+        <div class="header-start">
+          <button
+            id="menuBtn"
+            class="icon-btn"
+            title="Open menu"
+            aria-label="Open navigation menu"
+            aria-expanded="false"
+          >
+            ☰
+          </button>
+        </div>
         <div class="wordmark">
           <span class="word"
             >dhikr<svg
@@ -61,6 +87,8 @@
         </div>
       </header>
 
+      <div class="weather-line" id="weatherLine" aria-live="polite"></div>
+
       <div
         class="phrase-card"
         id="tapZone"
@@ -74,13 +102,7 @@
 
         <div class="necklace-wrap">
           <svg id="necklace" viewBox="0 0 320 300"></svg>
-          <div class="margin-note" id="marginNote">
-            start here
-            <svg class="note-arrow" viewBox="0 0 40 40" aria-hidden="true">
-              <path d="M4 4 C 10 14, 14 22, 22 30" />
-              <path d="M14 27 L22 30 L20 21" />
-            </svg>
-          </div>
+          <div class="margin-note" id="marginNote">tap here</div>
         </div>
 
         <div class="lap-info" id="lapInfo">Lap 1</div>
@@ -113,7 +135,14 @@
         <div class="stat">
           <span id="statStreak">0</span><label>Day streak</label>
         </div>
-        <div class="stat">
+        <div
+          class="stat clickable"
+          id="lifetimeStat"
+          role="button"
+          tabindex="0"
+          title="Reset lifetime count"
+          aria-label="Reset lifetime count"
+        >
           <span id="statLifetime">0</span><label>Lifetime</label>
         </div>
       </div>
@@ -175,6 +204,7 @@
       </div>
     </div>
 
-    <script src="script.js"></script>
+    <script type="module" src="js/nav.js"></script>
+    <script type="module" src="js/main.js"></script>
   </body>
 </html>

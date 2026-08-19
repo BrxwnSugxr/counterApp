@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1"
+    />
+    <title>Hadeeth — Dhikr Counter</title>
+    <meta
+      name="description"
+      content="Hadeeth collection — coming soon to the free dhikr counter app."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Amiri:wght@400;700&family=Inter:wght@400;500;600&family=Caveat:wght@500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <svg class="grain" width="0" height="0">
+      <filter id="noise">
+        <feTurbulence
+          type="fractalNoise"
+          baseFrequency="0.9"
+          numOctaves="2"
+          stitchTiles="stitch"
+        />
+      </filter>
+    </svg>
+    <div class="grain" style="filter: url(#noise); background: #000"></div>
+
+    <div class="nav-overlay" id="navOverlay"></div>
+    <nav class="nav-drawer" id="navDrawer" aria-label="Main navigation">
+      <div class="nav-drawer-header">
+        <span class="nav-drawer-title">Menu</span>
+        <button id="navClose" class="nav-close" aria-label="Close navigation">
+          ×
+        </button>
+      </div>
+      <a href="index.html" class="nav-link">Dhikr Counter</a>
+      <a href="adhkar.html" class="nav-link">Adhkar</a>
+      <a href="quran.html" class="nav-link">Quran</a>
+      <a href="hadeeth.html" class="nav-link active">Hadeeth</a>
+      <a href="99-names.html" class="nav-link">99 Names</a>
+    </nav>
+
+    <div class="app">
+      <header>
+        <div class="header-start">
+          <button
+            id="menuBtn"
+            class="icon-btn"
+            title="Open menu"
+            aria-label="Open navigation menu"
+            aria-expanded="false"
+          >
+            ☰
+          </button>
+        </div>
+        <div class="wordmark">
+          <span class="word"
+            >dhikr<svg
+              class="scribble"
+              viewBox="0 0 80 12"
+              preserveAspectRatio="none"
+              aria-hidden="true"
+            >
+              <path d="M2 6 C 18 2, 34 10, 50 5 S 70 2, 78 6" /></svg
+          ></span>
+          counter
+        </div>
+        <div class="header-actions"></div>
+      </header>
+
+      <h1 class="page-title">Hadeeth</h1>
+      <div class="page-sub">Sayings &amp; teachings</div>
+
+      <div class="placeholder-card">
+        <div class="glyph">📜</div>
+        <p>
+          A hadeeth collection is on its way. We're being careful to source and
+          reference everything properly before it goes live.
+        </p>
+        <a href="index.html" class="btn btn-primary" style="margin-top: 6px">
+          Go to counter
+        </a>
+      </div>
+
+      <div class="colophon">made for slow mornings and long queues</div>
+    </div>
+
+    <script type="module" src="js/nav.js"></script>
+  </body>
+</html>

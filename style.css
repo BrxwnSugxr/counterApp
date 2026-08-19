@@ -61,9 +61,32 @@
       }
 
       header {
-        display: flex;
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
         align-items: center;
-        justify-content: space-between;
+      }
+      .header-start {
+        justify-self: start;
+      }
+      .wordmark {
+        justify-self: center;
+      }
+      .header-actions {
+        justify-self: end;
+      }
+
+      .weather-line {
+        font-size: 12px;
+        color: var(--text-muted);
+        letter-spacing: 0.02em;
+        text-align: center;
+        min-height: 0;
+        opacity: 0;
+        transition: opacity 0.5s ease;
+        margin-top: -8px;
+      }
+      .weather-line.visible {
+        opacity: 1;
       }
       .wordmark {
         font-family: "Fraunces", serif;
@@ -130,6 +153,103 @@
         50% {
           transform: scale(1.08);
         }
+      }
+
+      /* Minus button gets its own bolder treatment so it reads clearly
+         as "undo a tap" rather than blending in with the reset icon. */
+      #minusBtn {
+        border: 2px solid var(--accent);
+        color: var(--accent);
+        font-weight: 700;
+        font-size: 18px;
+      }
+      #minusBtn:hover {
+        background: var(--accent-soft);
+        color: var(--text);
+        border-color: var(--accent);
+      }
+
+      /* ============ SIDE NAVIGATION ============ */
+      .nav-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.55);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.25s ease;
+        z-index: 40;
+      }
+      .nav-overlay.visible {
+        opacity: 1;
+        pointer-events: auto;
+      }
+      .nav-drawer {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 250px;
+        max-width: 78vw;
+        background: var(--surface);
+        border-right: 1px solid var(--border);
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+        z-index: 50;
+        display: flex;
+        flex-direction: column;
+        padding: 20px 0;
+      }
+      .nav-drawer.open {
+        transform: translateX(0);
+      }
+      .nav-drawer-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 20px 16px;
+        border-bottom: 1px solid var(--border);
+        margin-bottom: 8px;
+      }
+      .nav-drawer-title {
+        font-family: "Fraunces", serif;
+        font-weight: 500;
+        font-size: 17px;
+        color: var(--text);
+      }
+      .nav-close {
+        background: none;
+        border: none;
+        color: var(--text-muted);
+        font-size: 20px;
+        cursor: pointer;
+        line-height: 1;
+        padding: 4px;
+      }
+      .nav-close:hover {
+        color: var(--text);
+      }
+      .nav-link {
+        display: block;
+        padding: 13px 20px;
+        color: var(--text-muted);
+        text-decoration: none;
+        font-family: "Inter", sans-serif;
+        font-size: 15px;
+        letter-spacing: 0.01em;
+        border-left: 3px solid transparent;
+        transition:
+          color 0.15s,
+          background 0.15s,
+          border-color 0.15s;
+      }
+      .nav-link:hover {
+        color: var(--text);
+        background: var(--surface-2);
+      }
+      .nav-link.active {
+        color: var(--accent);
+        border-left-color: var(--accent);
+        background: var(--surface-2);
       }
 
       .phrase-card {
@@ -200,34 +320,32 @@
 
       .margin-note {
         position: absolute;
-        right: -6px;
-        bottom: 14%;
+        top: 46%;
+        left: 50%;
+        transform: translate(-50%, -50%);
         font-family: "Caveat", cursive;
-        font-size: 19px;
+        font-size: 22px;
         font-weight: 600;
         color: var(--accent);
-        transform: rotate(-9deg);
         line-height: 1;
         pointer-events: none;
         transition: opacity 0.5s ease;
-        text-align: right;
+        text-align: center;
+        white-space: nowrap;
+        animation: tapPulse 1.8s ease-in-out infinite;
       }
       .margin-note.gone {
         opacity: 0;
+        animation: none;
       }
-      .note-arrow {
-        width: 26px;
-        height: 26px;
-        display: block;
-        margin: 2px 0 0 auto;
-        transform: scaleX(-1) rotate(6deg);
-      }
-      .note-arrow path {
-        stroke: var(--accent);
-        stroke-width: 2;
-        fill: none;
-        stroke-linecap: round;
-        stroke-linejoin: round;
+      @keyframes tapPulse {
+        0%,
+        100% {
+          opacity: 0.75;
+        }
+        50% {
+          opacity: 1;
+        }
       }
       .bead {
         transition: fill 0.18s ease;
@@ -437,6 +555,29 @@
         letter-spacing: 0.08em;
         text-transform: uppercase;
       }
+      .stat.clickable {
+        cursor: pointer;
+        border-radius: 10px;
+        padding: 4px 6px;
+        margin: -4px -6px;
+        transition:
+          background 0.15s,
+          transform 0.15s;
+      }
+      .stat.clickable:hover {
+        background: var(--surface-2);
+      }
+      .stat.clickable:active {
+        transform: scale(0.97);
+      }
+      .stat.clickable.pending span {
+        color: var(--danger);
+        animation: pulse 1s ease-in-out infinite;
+      }
+      .stat.clickable.pending label::after {
+        content: " — tap to confirm";
+        color: var(--danger);
+      }
 
       .section-label {
         font-size: 11px;
@@ -553,4 +694,82 @@
         overflow: hidden;
         clip: rect(0, 0, 0, 0);
         white-space: nowrap;
+      }
+
+      /* ============ SHARED PAGE SHELL (non-counter pages) ============ */
+      .page-title {
+        font-family: "Fraunces", serif;
+        font-weight: 500;
+        font-size: 26px;
+        text-align: center;
+        margin: 4px 0 2px;
+      }
+      .page-sub {
+        font-size: 13px;
+        color: var(--text-muted);
+        text-align: center;
+        margin-bottom: 8px;
+      }
+      .placeholder-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 24px;
+        padding: 44px 24px;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+      }
+      .placeholder-card .glyph {
+        font-size: 30px;
+        opacity: 0.7;
+      }
+      .placeholder-card p {
+        color: var(--text-muted);
+        font-size: 14px;
+        max-width: 280px;
+        line-height: 1.5;
+        margin: 0;
+      }
+
+      .names-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+      @media (min-width: 480px) {
+        .names-grid {
+          grid-template-columns: 1fr 1fr 1fr;
+        }
+      }
+      .name-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 14px 10px;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+      }
+      .name-card .num {
+        font-size: 10px;
+        color: var(--text-muted);
+        letter-spacing: 0.06em;
+      }
+      .name-card .arabic-name {
+        font-family: "Amiri", serif;
+        font-size: 21px;
+        direction: rtl;
+      }
+      .name-card .translit-name {
+        font-family: "Fraunces", serif;
+        font-weight: 500;
+        font-size: 13px;
+      }
+      .name-card .meaning-name {
+        font-size: 11px;
+        color: var(--text-muted);
+        line-height: 1.3;
       }
