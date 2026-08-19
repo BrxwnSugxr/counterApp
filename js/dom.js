@@ -23,6 +23,7 @@ export const els = {
   statToday: $("statToday"),
   statStreak: $("statStreak"),
   statLifetime: $("statLifetime"),
+  lifetimeStat: $("lifetimeStat"),
   minusBtn: $("minusBtn"),
   resetBtn: $("resetBtn"),
   toast: $("toast"),

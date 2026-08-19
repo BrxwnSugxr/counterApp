@@ -5,6 +5,7 @@ import {
   buildTracks,
   decrement,
   resetCount,
+  resetLifetime,
   setCustomTarget,
   tap,
 } from "./actions.js";
@@ -66,6 +67,38 @@ function init() {
       els.resetBtn.classList.remove("pending");
       els.resetBtn.title = "Reset today's count";
       resetCount();
+    }
+  });
+
+  // Lifetime stat — tap once to arm, tap again within 3s to confirm reset
+  let lifetimePending = false,
+    lifetimeTimer = null;
+
+  function armLifetimeReset() {
+    lifetimePending = true;
+    els.lifetimeStat.classList.add("pending");
+    lifetimeTimer = setTimeout(function () {
+      lifetimePending = false;
+      els.lifetimeStat.classList.remove("pending");
+    }, 3000);
+  }
+
+  function handleLifetimeClick() {
+    if (!lifetimePending) {
+      armLifetimeReset();
+    } else {
+      clearTimeout(lifetimeTimer);
+      lifetimePending = false;
+      els.lifetimeStat.classList.remove("pending");
+      resetLifetime();
+    }
+  }
+
+  els.lifetimeStat.addEventListener("click", handleLifetimeClick);
+  els.lifetimeStat.addEventListener("keydown", function (e) {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      handleLifetimeClick();
     }
   });
 

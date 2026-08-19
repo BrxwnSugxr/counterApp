@@ -72,6 +72,14 @@ export function resetCount() {
   saveAll();
 }
 
+export function resetLifetime() {
+  meta.lifetime = 0;
+  render(false);
+  saveAll();
+  showToast("Lifetime count reset");
+  announce("Lifetime count reset to zero");
+}
+
 // ============ BUILD TARGET CHIPS ============
 export function buildTargets() {
   els.targets.innerHTML = "";
